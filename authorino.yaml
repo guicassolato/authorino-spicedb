@@ -1,0 +1,14 @@
+apiVersion: operator.authorino.kuadrant.io/v1beta1
+kind: Authorino
+metadata:
+  name: authorino
+spec:
+  listener:
+    tls:
+      enabled: false
+  oidcServer:
+    tls:
+      enabled: false
+
+  # TODO: Remove after https://github.com/kuadrant/authorino/pull/375 is merged
+  image: quay.io/kuadrant/authorino:authzed

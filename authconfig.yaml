@@ -1,0 +1,241 @@
+apiVersion: authorino.kuadrant.io/v1beta1
+kind: AuthConfig
+metadata:
+  name: docs-api-protection
+spec:
+  hosts:
+    - docs-api.127.0.0.1.nip.io
+
+  # Users authenticated with API keys
+  identity:
+    - name: api-key-users
+      apiKey:
+        selector:
+          matchLabels:
+            app: docs-api
+      credentials:
+        in: authorization_header
+        keySelector: APIKEY
+
+  authorization:
+    # Read or delete a resource → check in SpiceDB if the user has read or write permission respectively
+    - name: read-or-delete-resource
+      when:
+        - selector: context.request.http.method
+          operator: neq
+          value: POST
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+          operator: neq
+          value: allow
+      authzed:
+        endpoint: spicedb.spicedb.svc.cluster.local:50051
+        insecure: true
+        sharedSecretRef:
+          name: spicedb
+          key: token
+        subject:
+          kind:
+            value: user
+          name:
+            valueFrom:
+              authJSON: auth.identity.metadata.annotations.username
+        resource:
+          kind:
+            value: doc
+          name:
+            valueFrom:
+              authJSON: context.request.http.path.@extract:{"sep":"/","pos":2}
+        permission:
+          valueFrom:
+            authJSON: context.request.http.method.@replace:{"old":"GET","new":"read"}.@replace:{"old":"DELETE","new":"write"}
+
+    # Grant or revoke access to resource → check in SpiceDB if the user has write permission
+    - name: grant-or-revoke-access-to-resource
+      when:
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+          operator: eq
+          value: allow
+      authzed:
+        endpoint: spicedb.spicedb.svc.cluster.local:50051
+        insecure: true
+        sharedSecretRef:
+          name: spicedb
+          key: token
+        subject:
+          kind:
+            value: user
+          name:
+            valueFrom:
+              authJSON: auth.identity.metadata.annotations.username
+        resource:
+          kind:
+            value: doc
+          name:
+            valueFrom:
+              authJSON: context.request.http.path.@extract:{"sep":"/","pos":2}
+        permission:
+          value: write
+
+  response:
+    # Create new resource → inject user info in the request
+    - name: x-ext-auth-data
+      when:
+        - selector: context.request.http.method
+          operator: eq
+          value: POST
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+          operator: neq
+          value: allow
+      json:
+        properties:
+          - name: author
+            valueFrom: { authJSON: auth.identity.metadata.annotations.fullname }
+          - name: user_id
+            valueFrom: { authJSON: auth.identity.metadata.annotations.username }
+
+  callbacks:
+    # Create new resource → create 'writer' relationship in SpiceDB
+    - name: create-resource
+      when:
+        - selector: context.request.http.method
+          operator: eq
+          value: POST
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+          operator: neq
+          value: allow
+      http:
+        endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/write
+        method: POST
+        contentType: application/json
+        body:
+          valueFrom:
+            authJSON: |
+              \{
+                "updates":[
+                  \{
+                    "operation":"OPERATION_CREATE",
+                    "relationship":\{
+                      "resource":\{
+                        "objectType":"doc",
+                        "objectId":"{context.request.http.path.@extract:{"sep":"/","pos":2}}"
+                      \},
+                      "relation":"writer",
+                      "subject":\{
+                        "object":\{
+                          "objectType":"user",
+                          "objectId":"{auth.identity.metadata.annotations.username}"
+                        \}
+                      \}
+                    \}
+                  \}
+                ]
+              \}
+        sharedSecretRef:
+          name: spicedb
+          key: token
+
+    # Delete resource → delete all corresponding relationships in SpiceDB
+    - name: delete-resource
+      when:
+        - selector: context.request.http.method
+          operator: eq
+          value: DELETE
+        - selector: auth.authorization.spicedb
+          operator: neq
+          value: ""
+      http:
+        endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/delete
+        method: POST
+        contentType: application/json
+        body:
+          valueFrom:
+            authJSON: |
+              \{
+                "relationshipFilter": \{
+                  "resourceType": "doc",
+                  "optionalResourceId": "{context.request.http.path.@extract:{"sep":"/","pos":2}}"
+                \}
+              \}
+        sharedSecretRef:
+          name: spicedb
+          key: token
+
+    # Grant access to resource → create 'reader' relationship in SpiceDB
+    - name: grant-access
+      when:
+        - selector: context.request.http.method
+          operator: eq
+          value: POST
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+          operator: eq
+          value: allow
+      http:
+        endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/write
+        method: POST
+        contentType: application/json
+        body:
+          valueFrom:
+            authJSON: |
+              \{
+                "updates":[
+                  \{
+                    "operation":"OPERATION_CREATE",
+                    "relationship":\{
+                      "resource":\{
+                        "objectType":"doc",
+                        "objectId":"{context.request.http.path.@extract:{"sep":"/","pos":2}}"
+                      \},
+                      "relation":"reader",
+                      "subject":\{
+                        "object":\{
+                          "objectType":"user",
+                          "objectId":"{context.request.http.path.@extract:{"sep":"/","pos":4}}"
+                        \}
+                      \}
+                    \}
+                  \}
+                ]
+              \}
+        sharedSecretRef:
+          name: spicedb
+          key: token
+
+    # Revoke access to resource → delete 'reader' relationships in SpiceDB
+    - name: revoke-access
+      when:
+        - selector: context.request.http.method
+          operator: eq
+          value: DELETE
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+          operator: eq
+          value: allow
+      http:
+        endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/delete
+        method: POST
+        contentType: application/json
+        body:
+          valueFrom:
+            authJSON: |
+              \{
+                "relationshipFilter": \{
+                  "resourceType": "doc",
+                  "optionalResourceId": "{context.request.http.path.@extract:{"sep":"/","pos":2}}",
+                  "optionalRelation": "reader",
+                  "optionalSubjectFilter": \{
+                    "subjectType": "user",
+                    "optionalSubjectId": "{context.request.http.path.@extract:{"sep":"/","pos":4}}"
+                  \}
+                \}
+              \}
+        sharedSecretRef:
+          name: spicedb
+          key: token
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: spicedb
+  labels:
+    app: spicedb
+stringData:
+  token: secret
