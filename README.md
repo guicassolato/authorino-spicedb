@@ -968,3 +968,21 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
 ```sh
 kind delete cluster --name authorino-demo
 ```
+
+## Caveats
+
+### Consistency
+
+Because Authorino builds in SpiceDB the permission relationships implied by the requests sent to the Docs API _before_ these requests effectively hit the application, and at the same time the application itself has no knowledge of the authorization system in place at all, the system may run into a situation where the resources and relations stored in the application mismatch the state of the relationships in SpiceDB. This can happen, for example, if an authorized request (i.e. after passing Authorino) fails to be processed by the application due to a server error.
+
+To mitigate the risk of consistency issues, the HTTP requests sent to the Docs API must be treated as an atomic transaction from the moment Envoy hands it over to Authorino, until the upstream application response is processed by Envoy.
+
+To be able to recover from possible consistency issues in case the mitigation fails, logs of the requests handled by Authorino can be stored including timestamp, username, as well as method and path of the HTTP request. Such logs can be implemented by adding another Authorino [callback](https://github.com/Kuadrant/authorino/blob/main/docs/features.md#callbacks-callbacks) in the AuthConfig. The system should occasionally check for consistency issues and use the logs to rebuild the desired state incrementally.
+
+### Latency
+
+Compared to monolithic approach of embedded authorization rules and without proxy in the middle, another caveat of this implementation comes from the extra hops involved in the communication between sidecar proxy (Envoy) and authorization service (Authorino), authorization service and permission database/policy engine (SpiceDB), and sidecar proxy and upstream application (Docs API), and its significance in terms of added latency to the overall request.
+
+To mitigate the impact on latency especially due to the HTTP and GRPC communication between Authorino and SpiceDB, [caching](https://github.com/Kuadrant/authorino/blob/main/docs/features.md#common-feature-caching-cache) can be enabled in Authorino for the `metadata` and `authorization` rules.
+
+Performance can also be improved once `callbacks` in the AuthConfig can be processed asynchronously (see https://github.com/Kuadrant/authorino/issues/369).
