@@ -829,7 +829,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
 
   <br/>
 
-  As 👩🏾 Emilia, **create a doc**:
+  As 👩🏾 Emilia, **create** a doc:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -842,7 +842,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # {"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}
   ```
 
-  As 👩🏾 Emilia, **read the doc** just created:
+  As 👩🏾 Emilia, **read** the doc just created:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -851,7 +851,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # HTTP/1.1 200 OK
   ```
 
-  As 🧑🏻‍🦰 Beatrice, try to **read the doc** created by Emilia:
+  As 🧑🏻‍🦰 Beatrice, try to **read** the doc created by Emilia:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
@@ -861,7 +861,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # x-ext-auth-reason: PERMISSIONSHIP_NO_PERMISSION;token=...
   ```
 
-  As 👩🏾 Emilia, **grant access to the doc** for 🧑🏻‍🦰 Beatrice:
+  As 👩🏾 Emilia, **grant** access to the doc for 🧑🏻‍🦰 Beatrice:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -870,7 +870,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # HTTP/1.1 200 OK
   ```
 
-  As 🧑🏻‍🦰 Beatrice, try again to **read the doc** owned by Emilia:
+  As 🧑🏻‍🦰 Beatrice, try again to **read** the doc owned by Emilia:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
@@ -879,7 +879,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # HTTP/1.1 200 OK
   ```
 
-  As 🧑🏻‍🦰 Beatrice, **create a doc** of her own:
+  As 🧑🏻‍🦰 Beatrice, **create** a doc of her own:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
@@ -934,7 +934,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # [{"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}]
   ```
 
-  As 🧑🏻‍🦰 Beatrice, try one last time to **read the doc** owned by Emilia:
+  As 🧑🏻‍🦰 Beatrice, try one last time to **read** the doc owned by Emilia:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
@@ -944,7 +944,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # x-ext-auth-reason: PERMISSIONSHIP_NO_PERMISSION;token=...
   ```
 
-  As 👩🏾 Emilia, **delete the doc**:
+  As 👩🏾 Emilia, **delete** the doc:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -953,7 +953,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # HTTP/1.1 200 OK
   ```
 
-  As 👩🏾 Emilia, retry to **read the doc** just deleted:
+  As 👩🏾 Emilia, retry to **read** the doc just deleted:
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
