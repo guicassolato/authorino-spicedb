@@ -17,6 +17,37 @@ spec:
         in: authorization_header
         keySelector: APIKEY
 
+  metadata:
+    # List resources → lokkup resources the user has access to
+    - name: permission-lookup
+      when:
+        - selector: context.request.http.method
+          operator: eq
+          value: GET
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
+          operator: eq
+          value: ""
+      http:
+        endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/permissions/resources
+        method: POST
+        contentType: application/json
+        body:
+          valueFrom:
+            authJSON: |
+              \{
+                "resourceObjectType":"doc",
+                "permission":"read",
+                "subject":\{
+                  "object":\{
+                    "objectType":"user",
+                    "objectId":"{auth.identity.metadata.annotations.username}"
+                  \}
+                \}
+              \}
+        sharedSecretRef:
+          name: spicedb
+          key: token
+
   authorization:
     # Read or delete a resource → check in SpiceDB if the user has read or write permission respectively
     - name: read-or-delete-resource
@@ -24,6 +55,9 @@ spec:
         - selector: context.request.http.method
           operator: neq
           value: POST
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
+          operator: neq
+          value: ""
         - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
           operator: neq
           value: allow
@@ -92,6 +126,24 @@ spec:
             valueFrom: { authJSON: auth.identity.metadata.annotations.fullname }
           - name: user_id
             valueFrom: { authJSON: auth.identity.metadata.annotations.username }
+
+    # List resources → filter resource ids the user has access to
+    - name: x-filter
+      when:
+        - selector: context.request.http.method
+          operator: eq
+          value: GET
+        - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
+          operator: eq
+          value: ""
+      json:
+        properties:
+          - name: id
+            valueFrom:
+              authJSON: auth.metadata.permission-lookup.result.resourceObjectId
+          - name: ids
+            valueFrom:
+              authJSON: auth.metadata.permission-lookup.#.result.resourceObjectId
 
   callbacks:
     # Create new resource → create 'writer' relationship in SpiceDB

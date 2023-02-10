@@ -512,6 +512,37 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
           in: authorization_header
           keySelector: APIKEY
 
+    metadata:
+      # List resources → lokkup resources the user has access to
+      - name: permission-lookup
+        when:
+          - selector: context.request.http.method
+            operator: eq
+            value: GET
+          - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
+            operator: eq
+            value: ""
+        http:
+          endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/permissions/resources
+          method: POST
+          contentType: application/json
+          body:
+            valueFrom:
+              authJSON: |
+                \{
+                  "resourceObjectType":"doc",
+                  "permission":"read",
+                  "subject":\{
+                    "object":\{
+                      "objectType":"user",
+                      "objectId":"{auth.identity.metadata.annotations.username}"
+                    \}
+                  \}
+                \}
+          sharedSecretRef:
+            name: spicedb
+            key: token
+
     authorization:
       # Read or delete a resource → check in SpiceDB if the user has read or write permission respectively
       - name: read-or-delete-resource
@@ -519,6 +550,9 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
           - selector: context.request.http.method
             operator: neq
             value: POST
+          - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
+            operator: neq
+            value: ""
           - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
             operator: neq
             value: allow
@@ -587,6 +621,24 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
               valueFrom: { authJSON: auth.identity.metadata.annotations.fullname }
             - name: user_id
               valueFrom: { authJSON: auth.identity.metadata.annotations.username }
+
+      # List resources → filter resource ids the user has access to
+      - name: x-filter
+        when:
+          - selector: context.request.http.method
+            operator: eq
+            value: GET
+          - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
+            operator: eq
+            value: ""
+        json:
+          properties:
+            - name: id
+              valueFrom:
+                authJSON: auth.metadata.permission-lookup.result.resourceObjectId
+            - name: ids
+              valueFrom:
+                authJSON: auth.metadata.permission-lookup.#.result.resourceObjectId
 
     callbacks:
       # Create new resource → create 'writer' relationship in SpiceDB
@@ -827,6 +879,42 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # HTTP/1.1 200 OK
   ```
 
+  As 🧑🏻‍🦰 Beatrice, **create a doc** of her own:
+
+  ```sh
+  curl -H 'Authorization: APIKEY IAMBEATRICE' \
+     -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"title":"Beatrice´s doc","body":"This is Beatrice´s doc."}' \
+     http://docs-api.127.0.0.1.nip.io/docs/eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b -i
+  # HTTP/1.1 200 OK
+  # ...
+  # {"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}
+  ```
+
+  As 🧑🏻‍🦰 Beatrice, **list** all the docs Beatrice has access to:
+
+  ```sh
+  curl -H 'Authorization: APIKEY IAMBEATRICE' \
+     http://docs-api.127.0.0.1.nip.io/docs -i
+  # HTTP/1.1 200 OK
+  # ...
+  # [
+  #   {"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"},
+  #   {"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}
+  # ]
+  ```
+
+  As 👩🏾 Emilia, **list** all the docs Emilia has access to:
+
+  ```sh
+  curl -H 'Authorization: APIKEY IAMEMILIA' \
+     http://docs-api.127.0.0.1.nip.io/docs -i
+  # HTTP/1.1 200 OK
+  # ...
+  # [{"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}]
+  ```
+
   As 👩🏾 Emilia, **revoke** 🧑🏻‍🦰 Beatrice's access to the doc:
 
   ```sh
@@ -834,6 +922,16 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      -X DELETE \
      http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639/allow/beatrice -i
   # HTTP/1.1 200 OK
+  ```
+
+  As 🧑🏻‍🦰 Beatrice, **list** again the docs Beatrice has access to:
+
+  ```sh
+  curl -H 'Authorization: APIKEY IAMBEATRICE' \
+     http://docs-api.127.0.0.1.nip.io/docs -i
+  # HTTP/1.1 200 OK
+  # ...
+  # [{"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}]
   ```
 
   As 🧑🏻‍🦰 Beatrice, try one last time to **read the doc** owned by Emilia:
