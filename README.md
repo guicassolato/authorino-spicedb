@@ -120,7 +120,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
       spec:
         containers:
           - name: docs-api
-            image: quay.io/kuadrant/authorino-examples:news-api
+            image: quay.io/kuadrant/authorino-examples:docs-api
             imagePullPolicy: IfNotPresent
             env:
               - name: PORT
@@ -317,7 +317,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
       spec:
         containers:
           - name: docs-api
-            image: quay.io/kuadrant/authorino-examples:news-api
+            image: quay.io/kuadrant/authorino-examples:docs-api
             imagePullPolicy: IfNotPresent
             env:
               - name: PORT
