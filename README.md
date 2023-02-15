@@ -836,7 +836,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   <details>
     <summary><sub>What should happen?</sub></summary>
 
-  ![Create a doc](images/create-doc.jpg){width="80%"}
+  ![Create a doc](images/create-doc.jpg)
   </details>
 
   ```sh
@@ -857,7 +857,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   <details>
     <summary><sub>What should happen?</sub></summary>
 
-  ![Read the doc OK](images/read-doc-ok.jpg){width="80%"}
+  ![Read the doc OK](images/read-doc-ok.jpg)
   </details>
 
   ```sh
@@ -874,7 +874,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   <details>
     <summary><sub>What should happen?</sub></summary>
 
-  ![Read the doc NOK](images/read-doc-nok.jpg){width="80%"}
+  ![Read the doc NOK](images/read-doc-nok.jpg)
   </details>
 
   ```sh
@@ -892,7 +892,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   <details>
     <summary><sub>What should happen?</sub></summary>
 
-  ![Grant access](images/grant.jpg){width="80%"}
+  ![Grant access](images/grant.jpg)
   </details>
 
   ```sh
@@ -935,7 +935,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   <details>
     <summary><sub>What should happen?</sub></summary>
 
-  ![List docs](images/list-docs.jpg){width="80%"}
+  ![List docs](images/list-docs.jpg)
   </details>
 
   ```sh
@@ -968,7 +968,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   <details>
     <summary><sub>What should happen?</sub></summary>
 
-  ![Revoke access](images/revoke.jpg){width="80%"}
+  ![Revoke access](images/revoke.jpg)
   </details>
 
   ```sh
@@ -1009,7 +1009,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   <details>
     <summary><sub>What should happen?</sub></summary>
 
-  ![Delete the doc](images/delete-doc.jpg){width="80%"}
+  ![Delete the doc](images/delete-doc.jpg)
   </details>
 
   ```sh
