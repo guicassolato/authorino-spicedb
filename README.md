@@ -513,7 +513,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
           keySelector: APIKEY
 
     metadata:
-      # List resources → lokkup resources the user has access to
+      # List resources → lookup resources the user has access to
       - name: permission-lookup
         when:
           - selector: context.request.http.method

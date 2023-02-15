@@ -18,7 +18,7 @@ spec:
         keySelector: APIKEY
 
   metadata:
-    # List resources → lokkup resources the user has access to
+    # List resources → lookup resources the user has access to
     - name: permission-lookup
       when:
         - selector: context.request.http.method
