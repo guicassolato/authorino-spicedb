@@ -18,7 +18,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
 - **Kubernetes cluster**<br/>
   Started locally with [Kind](https://kind.sigs.k8s.io/).
 - **Docs API**<br/>
-  A REST API application that will be protected using Authzed and Authorino.<br/>
+  A REST API application that will be protected using SpiceDB and Authorino.<br/>
   The following HTTP endpoints are available:
   ```
   POST /docs/{id}    Create a doc
