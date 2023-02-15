@@ -844,10 +844,10 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      -X POST \
      -H 'Content-Type: application/json' \
      -d '{"title":"Emilia´s doc","body":"This is Emilia´s doc."}' \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
+     http://docs-api.127.0.0.1.nip.io/docs/123 -i
   # HTTP/1.1 200 OK
   # ...
-  # {"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}
+  # {"id":"123","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}
   ```
 
   <br/>
@@ -863,7 +863,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
      -X GET \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
+     http://docs-api.127.0.0.1.nip.io/docs/123 -i
   # HTTP/1.1 200 OK
   ```
 
@@ -880,7 +880,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
      -X GET \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
+     http://docs-api.127.0.0.1.nip.io/docs/123 -i
   # HTTP/1.1 403 Forbidden
   # x-ext-auth-reason: PERMISSIONSHIP_NO_PERMISSION;token=...
   ```
@@ -898,7 +898,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
      -X POST \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639/allow/beatrice -i
+     http://docs-api.127.0.0.1.nip.io/docs/123/allow/beatrice -i
   # HTTP/1.1 200 OK
   ```
 
@@ -909,7 +909,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
      -X GET \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
+     http://docs-api.127.0.0.1.nip.io/docs/123 -i
   # HTTP/1.1 200 OK
   ```
 
@@ -922,10 +922,10 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      -X POST \
      -H 'Content-Type: application/json' \
      -d '{"title":"Beatrice´s doc","body":"This is Beatrice´s doc."}' \
-     http://docs-api.127.0.0.1.nip.io/docs/eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b -i
+     http://docs-api.127.0.0.1.nip.io/docs/456 -i
   # HTTP/1.1 200 OK
   # ...
-  # {"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}
+  # {"id":"456","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}
   ```
 
   <br/>
@@ -944,8 +944,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # HTTP/1.1 200 OK
   # ...
   # [
-  #   {"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"},
-  #   {"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}
+  #   {"id":"123","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"},
+  #   {"id":"456","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}
   # ]
   ```
 
@@ -958,7 +958,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      http://docs-api.127.0.0.1.nip.io/docs -i
   # HTTP/1.1 200 OK
   # ...
-  # [{"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}]
+  # [{"id":"123","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}]
   ```
 
   <br/>
@@ -974,7 +974,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
      -X DELETE \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639/allow/beatrice -i
+     http://docs-api.127.0.0.1.nip.io/docs/123/allow/beatrice -i
   # HTTP/1.1 200 OK
   ```
 
@@ -987,7 +987,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      http://docs-api.127.0.0.1.nip.io/docs -i
   # HTTP/1.1 200 OK
   # ...
-  # [{"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}]
+  # [{"id":"456","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}]
   ```
 
   <br/>
@@ -997,7 +997,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
      -X GET \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
+     http://docs-api.127.0.0.1.nip.io/docs/123 -i
   # HTTP/1.1 403 Forbidden
   # x-ext-auth-reason: PERMISSIONSHIP_NO_PERMISSION;token=...
   ```
@@ -1015,7 +1015,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
      -X DELETE \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
+     http://docs-api.127.0.0.1.nip.io/docs/123 -i
   # HTTP/1.1 200 OK
   ```
 
@@ -1026,7 +1026,7 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
      -X GET \
-     http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
+     http://docs-api.127.0.0.1.nip.io/docs/123 -i
   # HTTP/1.1 404 Not Found
   ```
 </details>
