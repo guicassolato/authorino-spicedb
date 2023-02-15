@@ -21,9 +21,9 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   A REST API application that will be protected using SpiceDB and Authorino.<br/>
   The following HTTP endpoints are available:
   ```
-  POST /docs/{id}    Create a doc
   GET /docs          List all docs
   GET /docs/{id}     Read a doc
+  POST /docs/{id}    Create a doc
   DELETE /docs/{id}  Delete a doc
   ```
 - **[Envoy proxy](https://envoyproxy.io)**<br/>
@@ -40,6 +40,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   Open source Zanzibar-inspired database to store, compute, and validate fine grained permissions.
 - **[Contour](https://projectcontour.io)**<br/>
   Kubernetes Ingress Controller based on the Envoy proxy, to handle the ingress traffic to the Docs API and to Keycloak.
+
+![Architecture](images/architecture.jpg)
 
 > **Note:** For simplicity, in the demo all components are deployed without TLS.
 
@@ -831,6 +833,12 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
 
   As 👩🏾 Emilia, **create** a doc:
 
+  <details>
+    <summary><sub>What should happen?</sub></summary>
+
+  ![Create a doc](images/create-doc.jpg){width="80%"}
+  </details>
+
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
      -X POST \
@@ -842,7 +850,15 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # {"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}
   ```
 
+  <br/>
+
   As 👩🏾 Emilia, **read** the doc just created:
+
+  <details>
+    <summary><sub>What should happen?</sub></summary>
+
+  ![Read the doc OK](images/read-doc-ok.jpg){width="80%"}
+  </details>
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -851,7 +867,15 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # HTTP/1.1 200 OK
   ```
 
+  <br/>
+
   As 🧑🏻‍🦰 Beatrice, try to **read** the doc created by Emilia:
+
+  <details>
+    <summary><sub>What should happen?</sub></summary>
+
+  ![Read the doc NOK](images/read-doc-nok.jpg){width="80%"}
+  </details>
 
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
@@ -861,7 +885,15 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # x-ext-auth-reason: PERMISSIONSHIP_NO_PERMISSION;token=...
   ```
 
+  <br/>
+
   As 👩🏾 Emilia, **grant** access to the doc for 🧑🏻‍🦰 Beatrice:
+
+  <details>
+    <summary><sub>What should happen?</sub></summary>
+
+  ![Grant access](images/grant.jpg){width="80%"}
+  </details>
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -869,6 +901,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639/allow/beatrice -i
   # HTTP/1.1 200 OK
   ```
+
+  <br/>
 
   As 🧑🏻‍🦰 Beatrice, try again to **read** the doc owned by Emilia:
 
@@ -878,6 +912,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
   # HTTP/1.1 200 OK
   ```
+
+  <br/>
 
   As 🧑🏻‍🦰 Beatrice, **create** a doc of her own:
 
@@ -892,7 +928,15 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # {"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}
   ```
 
+  <br/>
+
   As 🧑🏻‍🦰 Beatrice, **list** all the docs Beatrice has access to:
+
+  <details>
+    <summary><sub>What should happen?</sub></summary>
+
+  ![List docs](images/list-docs.jpg){width="80%"}
+  </details>
 
   ```sh
   curl -H 'Authorization: APIKEY IAMBEATRICE' \
@@ -905,6 +949,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # ]
   ```
 
+  <br/>
+
   As 👩🏾 Emilia, **list** all the docs Emilia has access to:
 
   ```sh
@@ -915,7 +961,15 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # [{"id":"e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639","title":"Emilia´s doc","body":"This is Emilia´s doc.","date":"2023-02-07 18:17:30 +0000","author":"👩🏾 Emilia Jones","user_id":"emilia"}]
   ```
 
+  <br/>
+
   As 👩🏾 Emilia, **revoke** 🧑🏻‍🦰 Beatrice's access to the doc:
+
+  <details>
+    <summary><sub>What should happen?</sub></summary>
+
+  ![Revoke access](images/revoke.jpg){width="80%"}
+  </details>
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -923,6 +977,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639/allow/beatrice -i
   # HTTP/1.1 200 OK
   ```
+
+  <br/>
 
   As 🧑🏻‍🦰 Beatrice, **list** again the docs Beatrice has access to:
 
@@ -934,6 +990,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # [{"id":"eed6a74b-ccb1-4e8f-afab-be2a5e1bd97b","title":"Beatrice´s doc","body":"This is Beatrice´s doc.","date":"2023-02-07 18:25:10 +0000","author":"🧑🏻‍🦰 Beatrice Smith","user_id":"beatrice"}]
   ```
 
+  <br/>
+
   As 🧑🏻‍🦰 Beatrice, try one last time to **read** the doc owned by Emilia:
 
   ```sh
@@ -944,7 +1002,15 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
   # x-ext-auth-reason: PERMISSIONSHIP_NO_PERMISSION;token=...
   ```
 
+  <br/>
+
   As 👩🏾 Emilia, **delete** the doc:
+
+  <details>
+    <summary><sub>What should happen?</sub></summary>
+
+  ![Delete the doc](images/delete-doc.jpg){width="80%"}
+  </details>
 
   ```sh
   curl -H 'Authorization: APIKEY IAMEMILIA' \
@@ -952,6 +1018,8 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
      http://docs-api.127.0.0.1.nip.io/docs/e9ebb594-c3fc-4f0d-bbbd-a0fd3fac6639 -i
   # HTTP/1.1 200 OK
   ```
+
+  <br/>
 
   As 👩🏾 Emilia, retry to **read** the doc just deleted:
 
