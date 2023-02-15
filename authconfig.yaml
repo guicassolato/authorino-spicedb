@@ -6,6 +6,22 @@ spec:
   hosts:
     - docs-api.127.0.0.1.nip.io
 
+  patterns:
+    create:
+      - selector: context.request.http.method
+        operator: eq
+        value: POST
+      - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+        operator: neq
+        value: allow
+    list:
+      - selector: context.request.http.method
+        operator: eq
+        value: GET
+      - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
+        operator: eq
+        value: ""
+
   # Users authenticated with API keys
   identity:
     - name: api-key-users
@@ -18,15 +34,10 @@ spec:
         keySelector: APIKEY
 
   metadata:
-    # List resources → lookup resources the user has access to
-    - name: permission-lookup
+    # List resources → lookup resources the user has read access to
+    - name: permission-lookup-read
       when:
-        - selector: context.request.http.method
-          operator: eq
-          value: GET
-        - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
-          operator: eq
-          value: ""
+        - patternRef: list
       http:
         endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/permissions/resources
         method: POST
@@ -43,6 +54,29 @@ spec:
                     "objectId":"{auth.identity.metadata.annotations.username}"
                   \}
                 \}
+              \}
+        sharedSecretRef:
+          name: spicedb
+          key: token
+
+    # Create resource → lookup resources the user has write access to
+    - name: permission-lookup-write
+      when:
+        - patternRef: create
+      http:
+        endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/permissions/subjects
+        method: POST
+        contentType: application/json
+        body:
+          valueFrom:
+            authJSON: |
+              \{
+                "resource": \{
+                  "objectType": "doc",
+                  "objectId": "{context.request.http.path.@extract:{"sep":"/","pos":2}}"
+                \},
+                "permission": "write",
+                "subjectObjectType": "user"
               \}
         sharedSecretRef:
           name: spicedb
@@ -83,6 +117,16 @@ spec:
           valueFrom:
             authJSON: context.request.http.method.@replace:{"old":"GET","new":"read"}.@replace:{"old":"DELETE","new":"write"}
 
+    # Create a resource → ensure the writer relationship does not exist in SpiceDB
+    - name: create-resource
+      when:
+        - patternRef: create
+      json:
+        rules:
+          - selector: auth.metadata.permission-lookup-write.result
+            operator: eq
+            value: ""
+
     # Grant or revoke access to resource → check in SpiceDB if the user has write permission
     - name: grant-or-revoke-access-to-resource
       when:
@@ -114,12 +158,7 @@ spec:
     # Create new resource → inject user info in the request
     - name: x-ext-auth-data
       when:
-        - selector: context.request.http.method
-          operator: eq
-          value: POST
-        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
-          operator: neq
-          value: allow
+        - patternRef: create
       json:
         properties:
           - name: author
@@ -130,31 +169,23 @@ spec:
     # List resources → filter resource ids the user has access to
     - name: x-filter
       when:
-        - selector: context.request.http.method
-          operator: eq
-          value: GET
-        - selector: context.request.http.path.@extract:{"sep":"/","pos":2}
-          operator: eq
-          value: ""
+        - patternRef: list
       json:
         properties:
           - name: id
             valueFrom:
-              authJSON: auth.metadata.permission-lookup.result.resourceObjectId
+              authJSON: auth.metadata.permission-lookup-read.result.resourceObjectId
           - name: ids
             valueFrom:
-              authJSON: auth.metadata.permission-lookup.#.result.resourceObjectId
+              authJSON: auth.metadata.permission-lookup-read.#.result.resourceObjectId
 
   callbacks:
     # Create new resource → create 'writer' relationship in SpiceDB
     - name: create-resource
       when:
-        - selector: context.request.http.method
-          operator: eq
-          value: POST
-        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
+        - selector: auth.authorization.create-resource
           operator: neq
-          value: allow
+          value: ""
       http:
         endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/write
         method: POST
@@ -189,12 +220,12 @@ spec:
     # Delete resource → delete all corresponding relationships in SpiceDB
     - name: delete-resource
       when:
+        - selector: auth.authorization.read-or-delete-resource
+          operator: neq
+          value: ""
         - selector: context.request.http.method
           operator: eq
           value: DELETE
-        - selector: auth.authorization.spicedb
-          operator: neq
-          value: ""
       http:
         endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/delete
         method: POST
@@ -215,12 +246,12 @@ spec:
     # Grant access to resource → create 'reader' relationship in SpiceDB
     - name: grant-access
       when:
+        - selector: auth.authorization.grant-or-revoke-access-to-resource
+          operator: neq
+          value: ""
         - selector: context.request.http.method
           operator: eq
           value: POST
-        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
-          operator: eq
-          value: allow
       http:
         endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/write
         method: POST
@@ -255,12 +286,12 @@ spec:
     # Revoke access to resource → delete 'reader' relationships in SpiceDB
     - name: revoke-access
       when:
+        - selector: auth.authorization.grant-or-revoke-access-to-resource
+          operator: neq
+          value: ""
         - selector: context.request.http.method
           operator: eq
           value: DELETE
-        - selector: context.request.http.path.@extract:{"sep":"/","pos":3}
-          operator: eq
-          value: allow
       http:
         endpoint: http://spicedb.spicedb.svc.cluster.local:8443/v1/relationships/delete
         method: POST
