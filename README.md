@@ -80,9 +80,6 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
 
   ```sh
   kubectl apply -f https://raw.githubusercontent.com/Kuadrant/authorino-operator/main/config/deploy/manifests.yaml
-
-  # TODO: Remove after https://github.com/kuadrant/authorino/pull/375 is merged and the Operator is up to date with the latest version of the manifests
-  kubectl apply -f https://raw.githubusercontent.com/Kuadrant/authorino/authzed/install/manifests.yaml
   ```
 
   > **Note:** In OpenShift, the Authorino Operator can alternatively be installed directly from the Red Hat OperatorHub, using [Operator Lifecycle Manager](https://olm.operatorframework.io/).
@@ -290,9 +287,6 @@ The full scope of the demo consists of protecting endpoints of a REST API that h
     oidcServer:
       tls:
         enabled: false
-
-    # TODO: Remove after https://github.com/kuadrant/authorino/pull/375 is merged
-    image: quay.io/kuadrant/authorino:authzed
   EOF
   ```
 </details>
